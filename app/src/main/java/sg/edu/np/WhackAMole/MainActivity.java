@@ -13,7 +13,13 @@ import android.widget.TextView;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
-
+    private static final  String TAG = "Whack-A-Mole 1.0";
+    private  static  String[]  buttonLogs = {"Button Left CLicked" , "Button Middle CLicked" , "Button Right CLicked"} ;
+    private static int[] basicButtons = {R.id.button1 , R.id.button2 ,R.id.button3};
+    int score = 0;
+    TextView scoreView;
+    Button mole;
+    int randomLocation;
     /* Hint
         - The function setNewMole() uses the Random class to generate a random value ranged from 0 to 2.
         - The function doCheck() takes in button selected and computes a hit or miss and adjust the score accordingly.
@@ -22,13 +28,26 @@ public class MainActivity extends AppCompatActivity {
         - The function nextLevel() launches the new advanced page.
         - Feel free to modify the function to suit your program.
     */
-
+    // put listener here
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        scoreView = (TextView) findViewById(R.id.textView1);
+        scoreView.setText(String.valueOf(score));
+
         Log.v(TAG, "Finished Pre-Initialisation!");
+
+        for (final int i : basicButtons){
+            final Button button = findViewById(i);
+            button.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View view) {
+                    doCheck(button);
+                }
+            });
+        }
 
 
     }
@@ -55,6 +74,24 @@ public class MainActivity extends AppCompatActivity {
         /* Checks for hit or miss and if user qualify for advanced page.
             Triggers nextLevelQuery().
          */
+        if(mole == checkButton){
+            score++;
+            Log.v(TAG, "Hit, score added!");
+        }else{
+            if (score > 0){
+                score--;
+            }
+            Log.v(TAG, "Missed, score deducted!");
+        }
+
+        Log.v(TAG, buttonLogs[randomLocation]);
+        scoreView.setText(String.valueOf(score));
+
+        if(score%10 == 0 && score != 0){
+            nextLevelQuery();
+        }else{
+            setNewMole();
+        }
     }
 
     private void nextLevelQuery(){
@@ -64,14 +101,59 @@ public class MainActivity extends AppCompatActivity {
         Log.v(TAG, "User decline!");
         Log.v(TAG, "Advance option given to user!");
         belongs here*/
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+
+        //Set dialog Characteristic
+        builder.setTitle("Warning! Insane Whack-A-Mole Incoming!").setMessage("Would you like to advance to advanced mode?");
+
+        //Set Yes buttons
+        builder.setPositiveButton("YES" , new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Log.v(TAG, "User accepts!");
+                nextLevel();
+            }
+        });
+
+        //Set No buttons
+        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Log.v(TAG, "User decline!");
+                setNewMole();
+            }
+        });
+
+        //Create alert Dialog
+        AlertDialog dialog = builder.create();
+
+        dialog.show();
     }
 
     private void nextLevel(){
         /* Launch advanced page */
+        Intent advanceLevel = new Intent(this,Main2Activity.class);
+        advanceLevel.putExtra("Score",score);
+
+        startActivity(advanceLevel);
     }
 
     private void setNewMole() {
         Random ran = new Random();
-        int randomLocation = ran.nextInt(3);
+        randomLocation = ran.nextInt(3);
+        mole = findViewById(basicButtons[randomLocation]);
+        mole.setText("*");
+
+        for (final int i:
+                basicButtons) {
+            final Button button = findViewById(i);
+            if(button != mole){
+                button.setText("O");
+            }
+
+        }
+
+
     }
 }
